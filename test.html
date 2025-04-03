@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe (6-Piece Rule, Win Detection, Restart)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #board {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border: 2px solid #000;
+      user-select: none;
+    }
+
+    .cell:hover {
+      background-color: #f0f0f0;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 24px;
+      min-height: 30px; /* so the page doesn't jump when empty */
+    }
+
+    button {
+      margin-top: 15px;
+      font-size: 16px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe (6-Piece Rule)</h1>
+
+  <div id="board">
+    <!-- 9 cells for a 3x3 tic tac toe board -->
+    <div class="cell" id="cell0" onclick="handleCellClick(0)"></div>
+    <div class="cell" id="cell1" onclick="handleCellClick(1)"></div>
+    <div class="cell" id="cell2" onclick="handleCellClick(2)"></div>
+    <div class="cell" id="cell3" onclick="handleCellClick(3)"></div>
+    <div class="cell" id="cell4" onclick="handleCellClick(4)"></div>
+    <div class="cell" id="cell5" onclick="handleCellClick(5)"></div>
+    <div class="cell" id="cell6" onclick="handleCellClick(6)"></div>
+    <div class="cell" id="cell7" onclick="handleCellClick(7)"></div>
+    <div class="cell" id="cell8" onclick="handleCellClick(8)"></div>
+  </div>
+
+  <div id="message"></div>
+  <button onclick="restartGame()">Restart</button>
+
+  <script>
+    // Keep the current board state: 'X', 'O', or null for each cell
+    let boardState = [null, null, null, null, null, null, null, null, null];
+
+    // Whose turn it is (X always starts)
+    let currentPlayer = 'X';
+
+    // Queue to store the indices of the cells in the order they were placed
+    let moveQueue = [];
+
+    // Track if the game is over (once we have a winner, no more moves)
+    let gameOver = false;
+
+    // Fired when a cell is clicked
+    function handleCellClick(index) {
+      // If game is over or cell is already taken, do nothing
+      if (gameOver || boardState[index] !== null) {
+        return;
+      }
+
+      // Place current player's mark in the cell
+      boardState[index] = currentPlayer;
+      document.getElementById('cell' + index).textContent = currentPlayer;
+      moveQueue.push(index);
+
+      // Enforce the 6-piece rule
+      if (moveQueue.length > 6) {
+        // Remove oldest piece
+        const oldestIndex = moveQueue.shift();
+        boardState[oldestIndex] = null;
+        document.getElementById('cell' + oldestIndex).textContent = '';
+      }
+
+      // Check for a winner
+      const winner = checkForWinner();
+      if (winner) {
+        document.getElementById('message').textContent = winner + ' wins!';
+        gameOver = true;
+        return;
+      }
+
+      // Switch player
+      currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+    }
+
+    // Check all winning lines to see if X or O has won
+    function checkForWinner() {
+      const lines = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // columns
+        [0,4,8], [2,4,6]           // diagonals
+      ];
+
+      for (let i = 0; i < lines.length; i++) {
+        const [a, b, c] = lines[i];
+        if (
+          boardState[a] &&
+          boardState[a] === boardState[b] &&
+          boardState[b] === boardState[c]
+        ) {
+          return boardState[a]; // Return 'X' or 'O'
+        }
+      }
+      return null;
+    }
+
+    // Restart the game completely
+    function restartGame() {
+      boardState = [null, null, null, null, null, null, null, null, null];
+      currentPlayer = 'X';
+      gameOver = false;
+      moveQueue = [];
+
+      // Clear the UI
+      for (let i = 0; i < 9; i++) {
+        document.getElementById('cell' + i).textContent = '';
+      }
+      document.getElementById('message').textContent = '';
+    }
+  </script>
+
+</body>
+</html>
